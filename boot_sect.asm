@@ -6,10 +6,13 @@
     mov bx, 0
 print_loop:
     mov al, [boot_msg + bx]
-    add bx, 1
-    int 0x10
     cmp al, 0
-    jnz print_loop
+    je  loop_end
+    int 0x10
+    add bx, 1
+    jmp print_loop
+
+loop_end:
     jmp $ ;$ = current address, so jump forever
 
 boot_msg:
