@@ -1,22 +1,21 @@
 ; vim: set ft=nasm:
 
     mov ah, 0x0e ; scrolling teletype BIOS routine
+    
+    mov bx, the_secret
+    add bx, 0x7c00
+    mov al, [bx]
+    int 0x10    ;well does it?
 
-    mov al, 'H'
-    int 0x10
-    mov al, 'e'
-    int 0x10
-    mov al, 'l'
-    int 0x10
-    mov al, 'l'
-    int 0x10
-    mov al, 'o'
-    int 0x10
-    mov al, '!'
-    int 0x10
+    mov al, [0x7c14]
+    int 0x10    ;what about this one?
 
     jmp $ ;$ = current address, so jump forever
 
-    times 510-($-$$) db 0 ;pad the boot sector out with zeros
+the_secret:
+    db "X"    
 
-    dw 0xaa55 ; 2-byte magic number for BIOS - identifies boot sector
+    ;padding and magic BIOS number
+
+    times 510-($-$$) db 0 
+    dw 0xaa55 
