@@ -12,6 +12,7 @@ main_loop:
     mov al, dl
     int 0x10        ; print iteration number
     mov al, 0x20    ; " "
+    int 0x10
 
     jmp print_loop
 
