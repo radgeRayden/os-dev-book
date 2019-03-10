@@ -25,7 +25,7 @@ print_hex:
 
     ; repeat process with low part of dx
     mov ch, dl
-    and ch, 0x0f
+    shr ch, 4
     mov bx, DIGITS
     add bl, ch
     mov ch, [bx]
