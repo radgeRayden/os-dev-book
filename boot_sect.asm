@@ -1,50 +1,37 @@
 ; vim: set ft=nasm:
     [org 0x7c00]
 
-    
-    mov bx, 0
-    mov cx, 0
+    mov [BOOT_DRIVE], dl    ; BIOS stores our boot drive in DL, so it's best
+                            ; to remember this for later.
 
-main_loop:
-    mov ah, 0x0e    ; scrolling teletype BIOS routine
-    mov dx, cx
-    add dx, 0x30    ; offset for number digits in ASCII
-    mov al, dl
-    int 0x10        ; print iteration number
-    mov al, 0x20    ; " "
-    int 0x10
+    mov bp, 0x8000          ; Here we set our stack safely out of the way,
+    mov sp, bp              ; at 0x8000
 
-    jmp print_loop
+    mov bx, 0x9000          ; Load 5 sectors to 0x0000(ES):0x9000(BX)
+    mov dh, 5               ; from the boot disk.
+    mov dl, [BOOT_DRIVE]
+    call disk_load
 
-print_end:
-    int 0x10
-    mov al, 0x0a    ; \n
-    int 0x10
-    mov al, 0x0d    ; \r
-    int 0x10
+    mov dx, [0x9000]        ; print out the first loaded word, which we expect
+    call print_hex          ; to be 0xDADA, stored at 0x9000
 
-    mov ah, 0x06    ; scroll window up
-    mov al, 0x01
-    int 0x10
-    mov bx, 0       ; reinit string counter
+    mov dx, [0x9000 + 512]  ; also, print the first word from the 2nd loaded sector:
+    call print_hex          ; should be 0xface
 
-    add cx, 1
-    cmp cx, 0xa
-    jne main_loop   ; only do this 10 times
-    jmp $           ;$ = current address, so jump forever
+    jmp $
 
-print_loop:
-    mov al, [boot_msg + bx]
-    cmp al, 0
-    je  print_end
-    int 0x10
-    add bx, 1
-    jmp print_loop
+    %include "print_string.asm"
+    %include "print_hex.asm"
+    %include "disk_load.asm"
 
-boot_msg:
-    db "Booting OS", 0 ; "Booting OS \n\r\0"
-
-    ;padding and magic BIOS number
+    BOOT_DRIVE db 0
 
     times 510-($-$$) db 0 
     dw 0xaa55 
+
+    ; We know that BIOS will load only the first 512-byte sector from the disk,
+    ; so if we purposely add a few more sectors to our code by repeating some
+    ; familiar numbers, we can prove to ourselves that we actually loaded those
+    ; additional two sectors from the disk we booted from.
+    times 256 dw 0xdada
+    times 256 dw 0xface

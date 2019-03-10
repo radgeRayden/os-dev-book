@@ -34,6 +34,7 @@ disk_error:
     call print_string
     mov dx, 0
     mov dl, al
+    hlt
     call print_hex
     jmp $
 
