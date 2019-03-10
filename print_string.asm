@@ -1,4 +1,6 @@
 ; vim: set ft=nasm:
+%ifndef PRINT_STRING
+    %define PRINT_STRING
 
 print_string:
     pusha
@@ -13,3 +15,5 @@ print_string:
 .str_end:
     popa
     ret
+
+%endif
